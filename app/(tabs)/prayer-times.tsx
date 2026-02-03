@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 type PrayerTimes = Record<string, string>;
+type AlarmSet = Record<string, boolean>;
 
 const DAILY_PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as const;
 
@@ -12,6 +13,7 @@ export default function PrayerTimesScreen() {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [loading, setLoading] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<string>("");
+  const [alarmSet, setAlarm] = useState<AlarmSet | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -66,6 +68,13 @@ export default function PrayerTimesScreen() {
     return "Fajr";
   }
 
+  function setForAlarm(alarmKey: string, value: boolean) {
+    setAlarm((prev) => ({
+      ...prev,
+      [alarmKey]: value ? true : false,
+    }));
+  }
+
   // ✅ returns after hooks
   if (loading) {
     return (
@@ -83,19 +92,21 @@ export default function PrayerTimesScreen() {
         {DAILY_PRAYERS.map((key) => {
           const value = prayerTimes?.[key] ?? "--:--";
           const isNext = key === nextPrayer;
+          const isAlarmSet = alarmSet?.[key] ?? false;
 
           return (
             <View key={key} style={[styles.rowItem, isNext && styles.selectedRow]}>
               <Text style={styles.time}>{key}:</Text>
-
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.time}>{value}</Text>
+              <Text style={styles.time}>{value}</Text>
+              <Pressable onPress={()=>setForAlarm(key, !isAlarmSet)}>
                 <Ionicons
-                  name={isNext ? "notifications" : "notifications-outline"}
+                  name={isAlarmSet ? "notifications" : "notifications-outline"}
                   size={20}
-                  color={isNext ? "#d35400" : "#2c3e50"}
+                  color={isAlarmSet ? "#f00000" : "#2c3e50"}
                   style={{ marginLeft: 8 }}
                 />
+              </Pressable>
               </View>
             </View>
           );

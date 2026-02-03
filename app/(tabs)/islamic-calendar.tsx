@@ -1,7 +1,5 @@
-import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 type HijriInfo = {
   hijriLabel: string;
@@ -11,12 +9,68 @@ type HijriInfo = {
 type Milestone = { title: string; dateLabel: string; inDays: number };
 
 const MILESTONES = [
-  { title: "Ramadan begins", hijriMonth: 9, hijriDay: 1 },
-  { title: "Dhul Hijjah begins", hijriMonth: 12, hijriDay: 1 },
+  { title: "Ramadan", hijriMonth: 9, hijriDay: 1 },
+  { title: "Dhul Hijjah", hijriMonth: 12, hijriDay: 1 },
   { title: "Day of Arafah", hijriMonth: 12, hijriDay: 9 },
   { title: "Eid al-Adha", hijriMonth: 12, hijriDay: 10 },
   { title: "Islamic New Year", hijriMonth: 1, hijriDay: 1 },
 ];
+
+// ✅ Info shown when user taps a mini-card
+type IslamicEventInfo = {
+  key: string;
+  title: string;
+  icon: string;
+  description: string;
+};
+
+const ISLAMIC_EVENTS: IslamicEventInfo[] = [
+  {
+    key: "ramadan",
+    title: "Ramadan",
+    icon: "🌙",
+    description:
+      "Ramadan is the month in which the Qur’an was revealed. Muslims fast from dawn to sunset, focusing on worship, self-discipline, and closeness to God.",
+  },
+  {
+    key: "dhulhijjah",
+    title: "Dhul Hijjah",
+    icon: "🕋",
+    description:
+      "Dhul Hijjah is the month of Hajj. Its first ten days are among the most blessed days in Islam.",
+  },
+  {
+    key: "arafah",
+    title: "Day of Arafah",
+    icon: "⛰️",
+    description:
+      "The Day of Arafah is the most sacred day of Hajj. Many Muslims fast on this day, seeking forgiveness and mercy.",
+  },
+  {
+    key: "eidadha",
+    title: "Eid al-Adha",
+    icon: "🎉",
+    description:
+      "Eid al-Adha commemorates Ibrahim’s devotion. It is marked by prayer, charity, and remembrance of God.",
+  },
+  {
+    key: "newyear",
+    title: "Islamic New Year",
+    icon: "✨",
+    description:
+      "The Islamic New Year marks the start of the Hijri calendar year (Muharram). Many use it for reflection and fresh intentions.",
+  },
+];
+
+function slugTitle(title: string) {
+  const t = title.toLowerCase();
+  if (t.includes("ramadan")) return "ramadan";
+  if (t.includes("dhul")) return "dhulhijjah";
+  if (t.includes("arafah")) return "arafah";
+  if (t.includes("eid")) return "eidadha";
+  if (t.includes("new year")) return "newyear";
+  return "other";
+}
 
 function formatDDMMYYYY(d: Date) {
   const dd = String(d.getDate()).padStart(2, "0");
@@ -103,12 +157,103 @@ async function findUpcomingMilestones(): Promise<Milestone[]> {
   return results.slice(0, 3);
 }
 
-export default function IslamicCalendarCard() {
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 999,
+        backgroundColor: "rgba(0,0,0,0.06)",
+      }}
+    >
+      <Text style={{ fontSize: 12, color: "#111", fontWeight: "600" }}>{children}</Text>
+    </View>
+  );
+}
+
+function EventMiniCard({
+  icon,
+  title,
+  subtitle,
+  onPress,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        flex: 1,
+        minWidth: 150,
+        borderRadius: 18,
+        padding: 12,
+        backgroundColor: "rgba(0,0,0,0.04)",
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.06)",
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 12,
+            backgroundColor: "rgba(255,255,255,0.9)",
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1,
+            borderColor: "rgba(0,0,0,0.06)",
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>{icon}</Text>
+        </View>
+
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 13, fontWeight: "800", color: "#111" }} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }} numberOfLines={1}>
+            {subtitle}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+export default function IslamicCalendarInline() {
   const [loading, setLoading] = useState(true);
   const [dateInfo, setDateInfo] = useState<HijriInfo | null>(null);
   const [moon, setMoon] = useState("🌙");
   const [upcoming, setUpcoming] = useState<Milestone[]>([]);
   const [error, setError] = useState("");
+
+  // ✅ which event is expanded
+  const [openEventKey, setOpenEventKey] = useState<string | null>(null);
+
+  // map milestones -> card items with icon + key
+  const upcomingCards = useMemo(() => {
+    return upcoming.slice(0, 3).map((m) => {
+      const key = slugTitle(m.title);
+      const info =
+        ISLAMIC_EVENTS.find((x) => x.key === key) ??
+        ({ key: "other", title: m.title, icon: "📅", description: "A special day in the Islamic calendar." } as IslamicEventInfo);
+
+      return {
+        milestone: m,
+        info,
+      };
+    });
+  }, [upcoming]);
+
+  const openInfo = useMemo(() => {
+    if (!openEventKey) return null;
+    return ISLAMIC_EVENTS.find((e) => e.key === openEventKey) ?? null;
+  }, [openEventKey]);
 
   useEffect(() => {
     let alive = true;
@@ -138,67 +283,107 @@ export default function IslamicCalendarCard() {
   }, []);
 
   return (
-      <LinearGradient
-        colors={["#f7f7fb", "#e9ecf3"]}
-        style={{ flex: 1 }}
-      >
-     <SafeAreaView style={{ flex: 1, backgroundColor: "transparent", justifyContent: "center", padding: 18 }}>
     <View
       style={{
-        backgroundColor: "#fff",
-        borderRadius: 22,
-        padding: 20,
-        borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.06)",
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 8 },
-        elevation: 6,
         marginTop: 14,
+        borderRadius: 22,
+        padding: 0,
+        backgroundColor: "rgba(255,255,255,0.92)",
+        borderWidth: 0,
+        borderColor: "rgba(0,0,0,0.06)",
       }}
     >
+      {/* Header row */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontSize: 13, fontWeight: "700", color: "#111" }}>Today</Text>
-        <Text style={{ fontSize: 18 }}>{moon}</Text>
+        <Text style={{ fontSize: 13, fontWeight: "800", color: "#111" }}>Today</Text>
+
+       
       </View>
 
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 14 }} />
+        <ActivityIndicator style={{ marginTop: 12 }} />
       ) : error ? (
-        <Text style={{ marginTop: 14, color: "#b00020" }}>{error}</Text>
+        <Text style={{ marginTop: 12, color: "#b00020" }}>{error}</Text>
       ) : dateInfo ? (
         <>
-          <Text style={{ marginTop: 14, fontSize: 16, fontWeight: "800", color: "#111" }}>
-            {dateInfo.gregorianLabel}
-          </Text>
-          <Text style={{ marginTop: 4, fontSize: 13, color: "#666" }}>
-            {dateInfo.hijriLabel}
-          </Text>
+          {/* Date pills */}
 
-          <View style={{ height: 1, backgroundColor: "#000", opacity: 0.06, marginVertical: 14 }} />
-
-          <Text style={{ fontSize: 13, fontWeight: "700", color: "#111" }}>Upcoming</Text>
-
-          {upcoming.length === 0 ? (
-            <Text style={{ marginTop: 8, fontSize: 13, color: "#666" }}>No upcoming dates found.</Text>
-          ) : (
-            upcoming.map((m) => (
-              <View key={m.title} style={{ marginTop: 10 }}>
-                <Text style={{ fontSize: 14, color: "#111", fontWeight: "600" }}>
-                  {m.title}{" "}
-                  <Text style={{ fontSize: 13, color: "#666", fontWeight: "400" }}>
-                    • in {m.inDays} days
-                  </Text>
-                </Text>
-                <Text style={{ fontSize: 12, color: "#777", marginTop: 2 }}>{m.dateLabel}</Text>
+           <View style={{ marginTop: 10 }}>
+                <EventMiniCard
+                  icon={moon}
+                  title={dateInfo.hijriLabel}
+                  subtitle={dateInfo.gregorianLabel}
+                  onPress={() => {}}
+                />
               </View>
-            ))
-          )}
+       
+          {/* Upcoming mini cards */}
+          <View style={{ marginTop: 14 }}>
+            <Text style={{ fontSize: 12, color: "#666", fontWeight: "700" }}>UPCOMING</Text>
+
+            {upcomingCards.length === 0 ? (
+              <View style={{ marginTop: 10 }}>
+                <EventMiniCard
+                  icon="📅"
+                  title="No upcoming"
+                  subtitle="Try again later"
+                  onPress={() => {}}
+                />
+              </View>
+            ) : (
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10, width: "50%" }}>
+                {upcomingCards.map(({ milestone, info }) => {
+                  const isOpen = openEventKey === info.key;
+
+                  return (
+                    <EventMiniCard
+                      key={milestone.title}
+                      icon={info.icon}
+                      title={info.title}
+                      subtitle={`in ${milestone.inDays} days`}
+                      onPress={() => setOpenEventKey(isOpen ? null : info.key)}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
+          {/* Expanded info panel */}
+          {openInfo ? (
+            <View
+              style={{
+                marginTop: 14,
+                backgroundColor: "rgba(0,0,0,0.04)",
+                borderRadius: 18,
+                padding: 14,
+                borderWidth: 1,
+                borderColor: "rgba(0,0,0,0.06)",
+              }}
+            >
+              <Text style={{ fontSize: 14, fontWeight: "900", color: "#111" }}>
+                {openInfo.icon} {openInfo.title}
+              </Text>
+
+              <Text
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                  lineHeight: 19,
+                  color: "#333",
+                }}
+              >
+                {openInfo.description}
+              </Text>
+
+              {/* Optional: show the exact date from milestone if it matches */}
+              <Text style={{ marginTop: 8, fontSize: 12, color: "#777" }}>
+                Tip: we can add “Read more” later, or show sources.
+              </Text>
+            </View>
+          ) : null}
         </>
       ) : null}
     </View>
-    </SafeAreaView>
-    </LinearGradient>
   );
 }
