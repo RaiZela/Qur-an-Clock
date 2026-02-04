@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View, useColorScheme } from "react-native";
 
 type HijriInfo = {
   hijriLabel: string;
@@ -16,7 +16,6 @@ const MILESTONES = [
   { title: "Islamic New Year", hijriMonth: 1, hijriDay: 1 },
 ];
 
-// ✅ Info shown when user taps a mini-card
 type IslamicEventInfo = {
   key: string;
   title: string;
@@ -36,8 +35,7 @@ const ISLAMIC_EVENTS: IslamicEventInfo[] = [
     key: "dhulhijjah",
     title: "Dhul Hijjah",
     icon: "🕋",
-    description:
-      "Dhul Hijjah is the month of Hajj. Its first ten days are among the most blessed days in Islam.",
+    description: "Dhul Hijjah is the month of Hajj. Its first ten days are among the most blessed days in Islam.",
   },
   {
     key: "arafah",
@@ -50,8 +48,7 @@ const ISLAMIC_EVENTS: IslamicEventInfo[] = [
     key: "eidadha",
     title: "Eid al-Adha",
     icon: "🎉",
-    description:
-      "Eid al-Adha commemorates Ibrahim’s devotion. It is marked by prayer, charity, and remembrance of God.",
+    description: "Eid al-Adha commemorates Ibrahim’s devotion. It is marked by prayer, charity, and remembrance of God.",
   },
   {
     key: "newyear",
@@ -157,31 +154,25 @@ async function findUpcomingMilestones(): Promise<Milestone[]> {
   return results.slice(0, 3);
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <View
-      style={{
-        paddingHorizontal: 12,
-        paddingVertical: 7,
-        borderRadius: 999,
-        backgroundColor: "rgba(0,0,0,0.06)",
-      }}
-    >
-      <Text style={{ fontSize: 12, color: "#111", fontWeight: "600" }}>{children}</Text>
-    </View>
-  );
-}
-
 function EventMiniCard({
   icon,
   title,
   subtitle,
   onPress,
+  theme,
 }: {
   icon: string;
   title: string;
   subtitle: string;
   onPress: () => void;
+  theme: {
+    cardBg: string;
+    border: string;
+    chipBg: string;
+    text: string;
+    muted: string;
+    iconBg: string;
+  };
 }) {
   return (
     <Pressable
@@ -191,9 +182,9 @@ function EventMiniCard({
         minWidth: 150,
         borderRadius: 18,
         padding: 12,
-        backgroundColor: "rgba(0,0,0,0.04)",
+        backgroundColor: theme.chipBg,
         borderWidth: 1,
-        borderColor: "rgba(0,0,0,0.06)",
+        borderColor: theme.border,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -202,21 +193,21 @@ function EventMiniCard({
             width: 34,
             height: 34,
             borderRadius: 12,
-            backgroundColor: "rgba(255,255,255,0.9)",
+            backgroundColor: theme.iconBg,
             alignItems: "center",
             justifyContent: "center",
             borderWidth: 1,
-            borderColor: "rgba(0,0,0,0.06)",
+            borderColor: theme.border,
           }}
         >
           <Text style={{ fontSize: 16 }}>{icon}</Text>
         </View>
 
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 13, fontWeight: "800", color: "#111" }} numberOfLines={1}>
+          <Text style={{ fontSize: 13, fontWeight: "800", color: theme.text }} numberOfLines={1}>
             {title}
           </Text>
-          <Text style={{ fontSize: 12, color: "#666", marginTop: 2 }} numberOfLines={1}>
+          <Text style={{ fontSize: 12, color: theme.muted, marginTop: 2 }} numberOfLines={1}>
             {subtitle}
           </Text>
         </View>
@@ -226,27 +217,43 @@ function EventMiniCard({
 }
 
 export default function IslamicCalendarInline() {
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+
+  const theme = useMemo(() => {
+    return {
+      containerBg: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.92)",
+      cardBg: isDark ? "#12121a" : "#ffffff",
+      chipBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+      border: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+      text: isDark ? "#f5f5ff" : "#111",
+      muted: isDark ? "rgba(245,245,255,0.70)" : "#666",
+      body: isDark ? "rgba(245,245,255,0.86)" : "#333",
+      iconBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.9)",
+      danger: "#b00020",
+    };
+  }, [isDark]);
+
   const [loading, setLoading] = useState(true);
   const [dateInfo, setDateInfo] = useState<HijriInfo | null>(null);
   const [moon, setMoon] = useState("🌙");
   const [upcoming, setUpcoming] = useState<Milestone[]>([]);
   const [error, setError] = useState("");
-
-  // ✅ which event is expanded
   const [openEventKey, setOpenEventKey] = useState<string | null>(null);
 
-  // map milestones -> card items with icon + key
   const upcomingCards = useMemo(() => {
     return upcoming.slice(0, 3).map((m) => {
       const key = slugTitle(m.title);
       const info =
         ISLAMIC_EVENTS.find((x) => x.key === key) ??
-        ({ key: "other", title: m.title, icon: "📅", description: "A special day in the Islamic calendar." } as IslamicEventInfo);
+        ({
+          key: "other",
+          title: m.title,
+          icon: "📅",
+          description: "A special day in the Islamic calendar.",
+        } as IslamicEventInfo);
 
-      return {
-        milestone: m,
-        info,
-      };
+      return { milestone: m, info };
     });
   }, [upcoming]);
 
@@ -287,39 +294,37 @@ export default function IslamicCalendarInline() {
       style={{
         marginTop: 14,
         borderRadius: 22,
-        padding: 0,
-        backgroundColor: "rgba(255,255,255,0.92)",
-        borderWidth: 0,
-        borderColor: "rgba(0,0,0,0.06)",
+        padding:20,
+        backgroundColor: theme.containerBg,
+        borderWidth: 1,
+        borderColor: theme.border,
       }}
     >
       {/* Header row */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontSize: 13, fontWeight: "800", color: "#111" }}>Today</Text>
-
-       
+        <Text style={{ fontSize: 13, fontWeight: "800", color: theme.text }}>Today</Text>
       </View>
 
       {loading ? (
         <ActivityIndicator style={{ marginTop: 12 }} />
       ) : error ? (
-        <Text style={{ marginTop: 12, color: "#b00020" }}>{error}</Text>
+        <Text style={{ marginTop: 12, color: theme.danger }}>{error}</Text>
       ) : dateInfo ? (
         <>
-          {/* Date pills */}
+          {/* Date card */}
+          <View style={{ marginTop: 10 }}>
+            <EventMiniCard
+              icon={moon}
+              title={dateInfo.hijriLabel}
+              subtitle={dateInfo.gregorianLabel}
+              onPress={() => {}}
+              theme={theme}
+            />
+          </View>
 
-           <View style={{ marginTop: 10 }}>
-                <EventMiniCard
-                  icon={moon}
-                  title={dateInfo.hijriLabel}
-                  subtitle={dateInfo.gregorianLabel}
-                  onPress={() => {}}
-                />
-              </View>
-       
           {/* Upcoming mini cards */}
           <View style={{ marginTop: 14 }}>
-            <Text style={{ fontSize: 12, color: "#666", fontWeight: "700" }}>UPCOMING</Text>
+            <Text style={{ fontSize: 12, color: theme.muted, fontWeight: "700" }}>UPCOMING</Text>
 
             {upcomingCards.length === 0 ? (
               <View style={{ marginTop: 10 }}>
@@ -328,10 +333,11 @@ export default function IslamicCalendarInline() {
                   title="No upcoming"
                   subtitle="Try again later"
                   onPress={() => {}}
+                  theme={theme}
                 />
               </View>
             ) : (
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10, width: "50%" }}>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 10, width: "100%" }}>
                 {upcomingCards.map(({ milestone, info }) => {
                   const isOpen = openEventKey === info.key;
 
@@ -342,6 +348,7 @@ export default function IslamicCalendarInline() {
                       title={info.title}
                       subtitle={`in ${milestone.inDays} days`}
                       onPress={() => setOpenEventKey(isOpen ? null : info.key)}
+                      theme={theme}
                     />
                   );
                 })}
@@ -354,31 +361,19 @@ export default function IslamicCalendarInline() {
             <View
               style={{
                 marginTop: 14,
-                backgroundColor: "rgba(0,0,0,0.04)",
+                backgroundColor: theme.chipBg,
                 borderRadius: 18,
                 padding: 14,
                 borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.06)",
+                borderColor: theme.border,
               }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "900", color: "#111" }}>
+              <Text style={{ fontSize: 14, fontWeight: "900", color: theme.text }}>
                 {openInfo.icon} {openInfo.title}
               </Text>
 
-              <Text
-                style={{
-                  marginTop: 6,
-                  fontSize: 13,
-                  lineHeight: 19,
-                  color: "#333",
-                }}
-              >
+              <Text style={{ marginTop: 6, fontSize: 13, lineHeight: 19, color: theme.body }}>
                 {openInfo.description}
-              </Text>
-
-              {/* Optional: show the exact date from milestone if it matches */}
-              <Text style={{ marginTop: 8, fontSize: 12, color: "#777" }}>
-                Tip: we can add “Read more” later, or show sources.
               </Text>
             </View>
           ) : null}

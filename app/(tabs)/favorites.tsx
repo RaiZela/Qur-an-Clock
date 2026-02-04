@@ -3,7 +3,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  useColorScheme,
+} from "react-native";
 
 const FAV_KEY = "favorite_ayahs_v1";
 
@@ -25,6 +33,30 @@ function formatSavedDate(ts: number) {
 }
 
 export default function FavoritesScreen() {
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+
+  const theme = useMemo(() => {
+    return {
+      bgGradient: isDark ? (["#0b0b0f", "#12121a"] as const) : (["#f7f7fb", "#e9ecf3"] as const),
+
+      cardBg: isDark ? "#12121a" : "#ffffff",
+      border: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+
+      text: isDark ? "#f5f5ff" : "#111",
+      muted: isDark ? "rgba(245,245,255,0.70)" : "#666",
+      subtle: isDark ? "rgba(245,245,255,0.55)" : "#777",
+      body: isDark ? "rgba(245,245,255,0.86)" : "#333",
+      placeholder: isDark ? "rgba(245,245,255,0.40)" : "#999",
+
+      chipBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      divider: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+
+      heart: "#e63946",
+      danger: "#b00020",
+    };
+  }, [isDark]);
+
   const [fontsLoaded] = useFonts({
     Amiri: require("../../assets/fonts/Amiri-Regular.ttf"),
   });
@@ -81,13 +113,15 @@ export default function FavoritesScreen() {
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={["#f7f7fb", "#e9ecf3"]} style={{ flex: 1 }}>
+    <LinearGradient colors={theme.bgGradient} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }}>
         {/* Header */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View>
-            <Text style={{ fontSize: 22, fontWeight: "900", color: "#111" }}>Favorites</Text>
-            <Text style={{ fontSize: 13, color: "#666", marginTop: 2 }}>
+            <Text style={{ fontSize: 22, fontWeight: "900", color: theme.text }}>
+              Favorites
+            </Text>
+            <Text style={{ fontSize: 13, color: theme.muted, marginTop: 2 }}>
               {items.length} saved verse{items.length === 1 ? "" : "s"}
             </Text>
           </View>
@@ -96,13 +130,15 @@ export default function FavoritesScreen() {
             <Pressable
               onPress={clearAll}
               style={{
-                backgroundColor: "rgba(0,0,0,0.06)",
+                backgroundColor: theme.chipBg,
                 paddingHorizontal: 12,
                 paddingVertical: 8,
                 borderRadius: 999,
+                borderWidth: 1,
+                borderColor: theme.border,
               }}
             >
-              <Text style={{ fontSize: 12, color: "#111", fontWeight: "700" }}>Clear</Text>
+              <Text style={{ fontSize: 12, color: theme.text, fontWeight: "700" }}>Clear</Text>
             </Pressable>
           ) : null}
         </View>
@@ -111,10 +147,10 @@ export default function FavoritesScreen() {
         <View
           style={{
             marginTop: 14,
-            backgroundColor: "#fff",
+            backgroundColor: theme.cardBg,
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "rgba(0,0,0,0.06)",
+            borderColor: theme.border,
             paddingHorizontal: 12,
             paddingVertical: 10,
             flexDirection: "row",
@@ -122,17 +158,17 @@ export default function FavoritesScreen() {
             gap: 10,
           }}
         >
-          <Ionicons name="search" size={18} color="#666" />
+          <Ionicons name="search" size={18} color={theme.muted} />
           <TextInput
             value={query}
             onChangeText={setQuery}
             placeholder="Search by surah, ref (2:255), or words…"
-            placeholderTextColor="#999"
-            style={{ flex: 1, fontSize: 14, color: "#111" }}
+            placeholderTextColor={theme.placeholder}
+            style={{ flex: 1, fontSize: 14, color: theme.text }}
           />
           {query.length > 0 ? (
             <Pressable onPress={() => setQuery("")} hitSlop={10}>
-              <Ionicons name="close-circle" size={18} color="#777" />
+              <Ionicons name="close-circle" size={18} color={theme.subtle} />
             </Pressable>
           ) : null}
         </View>
@@ -142,15 +178,17 @@ export default function FavoritesScreen() {
           <View
             style={{
               marginTop: 18,
-              backgroundColor: "#fff",
+              backgroundColor: theme.cardBg,
               borderRadius: 22,
               padding: 20,
               borderWidth: 1,
-              borderColor: "rgba(0,0,0,0.06)",
+              borderColor: theme.border,
             }}
           >
-            <Text style={{ fontSize: 16, fontWeight: "800", color: "#111" }}>No favorites yet</Text>
-            <Text style={{ marginTop: 6, fontSize: 13, color: "#666", lineHeight: 19 }}>
+            <Text style={{ fontSize: 16, fontWeight: "800", color: theme.text }}>
+              No favorites yet
+            </Text>
+            <Text style={{ marginTop: 6, fontSize: 13, color: theme.muted, lineHeight: 19 }}>
               Tap the heart on the verse card to save a verse. You’ll find it here.
             </Text>
           </View>
@@ -164,31 +202,31 @@ export default function FavoritesScreen() {
               key={v.id}
               style={{
                 marginTop: 14,
-                backgroundColor: "#fff",
+                backgroundColor: theme.cardBg,
                 borderRadius: 22,
                 padding: 18,
                 borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.06)",
+                borderColor: theme.border,
                 shadowColor: "#000",
-                shadowOpacity: 0.06,
+                shadowOpacity: isDark ? 0.18 : 0.06,
                 shadowRadius: 14,
                 shadowOffset: { width: 0, height: 7 },
-                elevation: 4,
+                elevation: isDark ? 2 : 4,
               }}
             >
               {/* Top row */}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <View style={{ flex: 1, paddingRight: 12 }}>
-                  <Text style={{ fontSize: 15, fontWeight: "900", color: "#111" }}>
+                  <Text style={{ fontSize: 15, fontWeight: "900", color: theme.text }}>
                     {v.surahEnglish} • {ref}
                   </Text>
-                  <Text style={{ fontSize: 12, color: "#777", marginTop: 3 }}>
+                  <Text style={{ fontSize: 12, color: theme.subtle, marginTop: 3 }}>
                     Saved {formatSavedDate(v.savedAt)} • Global #{v.globalAyah}
                   </Text>
                 </View>
 
                 <Pressable onPress={() => remove(v.id)} hitSlop={10}>
-                  <Ionicons name="heart" size={22} color="#e63946" />
+                  <Ionicons name="heart" size={22} color={theme.heart} />
                 </Pressable>
               </View>
 
@@ -200,7 +238,7 @@ export default function FavoritesScreen() {
                   fontSize: 18,
                   lineHeight: 32,
                   textAlign: "right",
-                  color: "#111",
+                  color: theme.text,
                 }}
                 numberOfLines={5}
               >
@@ -208,10 +246,10 @@ export default function FavoritesScreen() {
               </Text>
 
               {/* Divider */}
-              <View style={{ height: 1, backgroundColor: "#000", opacity: 0.06, marginVertical: 14 }} />
+              <View style={{ height: 1, backgroundColor: theme.divider, marginVertical: 14 }} />
 
               {/* English */}
-              <Text style={{ fontSize: 14, lineHeight: 21, color: "#333" }} numberOfLines={6}>
+              <Text style={{ fontSize: 14, lineHeight: 21, color: theme.body }} numberOfLines={6}>
                 {v.englishAyah}
               </Text>
 
@@ -220,33 +258,36 @@ export default function FavoritesScreen() {
                 <Pressable
                   onPress={async () => {
                     const text = `${v.surahEnglish} (${ref})\n\n${v.arabicAyah}\n\n${v.englishAyah}`;
-                    await AsyncStorage.setItem("last_copied_preview", text); // optional small debug
-                    // If you want actual clipboard, tell me and I’ll add expo-clipboard.
+                    await AsyncStorage.setItem("last_copied_preview", text);
                     Alert.alert("Copy", "If you want real copy-to-clipboard, I’ll add it next.");
                   }}
                   style={{
-                    backgroundColor: "rgba(0,0,0,0.06)",
+                    backgroundColor: theme.chipBg,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
                     borderRadius: 999,
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 8,
+                    borderWidth: 1,
+                    borderColor: theme.border,
                   }}
                 >
-                  <Ionicons name="copy-outline" size={16} color="#111" />
-                  <Text style={{ fontSize: 12, color: "#111", fontWeight: "700" }}>Copy</Text>
+                  <Ionicons name="copy-outline" size={16} color={theme.text} />
+                  <Text style={{ fontSize: 12, color: theme.text, fontWeight: "700" }}>Copy</Text>
                 </Pressable>
 
                 <View
                   style={{
-                    backgroundColor: "rgba(0,0,0,0.06)",
+                    backgroundColor: theme.chipBg,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
                     borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: theme.border,
                   }}
                 >
-                  <Text style={{ fontSize: 12, color: "#111", fontWeight: "700" }}>
+                  <Text style={{ fontSize: 12, color: theme.text, fontWeight: "700" }}>
                     {v.surahArabic}
                   </Text>
                 </View>
@@ -260,15 +301,15 @@ export default function FavoritesScreen() {
           <View
             style={{
               marginTop: 14,
-              backgroundColor: "#fff",
+              backgroundColor: theme.cardBg,
               borderRadius: 22,
               padding: 18,
               borderWidth: 1,
-              borderColor: "rgba(0,0,0,0.06)",
+              borderColor: theme.border,
             }}
           >
-            <Text style={{ fontSize: 14, fontWeight: "800", color: "#111" }}>No results</Text>
-            <Text style={{ marginTop: 6, fontSize: 13, color: "#666" }}>
+            <Text style={{ fontSize: 14, fontWeight: "800", color: theme.text }}>No results</Text>
+            <Text style={{ marginTop: 6, fontSize: 13, color: theme.muted }}>
               Try searching by surah name (e.g., “Baqarah”) or reference (e.g., “2:255”).
             </Text>
           </View>

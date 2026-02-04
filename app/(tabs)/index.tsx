@@ -3,8 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
-import { ScrollView } from "react-native";
-import IslamicCalendarInline from "./islamic-calendar";
+import { ScrollView, useColorScheme } from "react-native";
+import IslamicCalendarInline from "../islamic-calendar";
 
 import {
   ActivityIndicator,
@@ -29,7 +29,7 @@ type VerseData = {
 };
 
 type FavoriteAyah = VerseData & {
-  id: string; // unique id for dedupe
+  id: string;
   savedAt: number;
 };
 
@@ -37,12 +37,12 @@ function getGlobalAyahForNow(date: Date = new Date()): number {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
-  const dayNumber = Number(`${y}${m}${d}`); // YYYYMMDD
+  const dayNumber = Number(`${y}${m}${d}`);
 
   const minutesToday = date.getHours() * 60 + date.getMinutes();
   const seed = dayNumber * 1440 + minutesToday;
 
-  return (seed % TOTAL_AYAH) + 1; // 1..6236
+  return (seed % TOTAL_AYAH) + 1;
 }
 
 function randomGlobalAyah(): number {
@@ -50,6 +50,29 @@ function randomGlobalAyah(): number {
 }
 
 export default function Index() {
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+
+  const theme = useMemo(() => {
+    return {
+      bgGradient: isDark ? (["#0b0b0f", "#12121a"] as const) : (["#f7f7fb", "#e9ecf3"] as const),
+
+      cardBg: isDark ? "#12121a" : "#ffffff",
+      border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      shadow: isDark ? "#000" : "#000",
+
+      text: isDark ? "#f5f5ff" : "#111111",
+      muted: isDark ? "rgba(245,245,255,0.70)" : "#666666",
+      body: isDark ? "rgba(245,245,255,0.86)" : "#333333",
+
+      chipBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+      divider: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
+
+      danger: "#b00020",
+      heart: "#e63946",
+    };
+  }, [isDark]);
+
   // ✅ hooks first (INCLUDING useFonts)
   const [fontsLoaded] = useFonts({
     Amiri: require("../../assets/fonts/Amiri-Regular.ttf"),
@@ -65,7 +88,7 @@ export default function Index() {
 
   const currentFavId = useMemo(() => {
     if (!data) return "";
-    return `${data.surahNumber}:${data.ayahInSurah}`; // stable unique id
+    return `${data.surahNumber}:${data.ayahInSurah}`;
   }, [data]);
 
   const isSaved = useMemo(() => {
@@ -119,8 +142,6 @@ export default function Index() {
   }
 
   async function refreshRandom() {
-    // NOTE: If you refresh within the same minute, "for this minute" verse stays the same.
-    // This random refresh gives you a new verse instantly.
     setLoading(true);
     setError("");
     try {
@@ -143,29 +164,21 @@ export default function Index() {
     await AsyncStorage.setItem(FAV_KEY, JSON.stringify(next));
   }
 
- async function toggleFavorite() {
-  if (!data) return;
+  async function toggleFavorite() {
+    if (!data) return;
 
-  const id = `${data.surahNumber}:${data.ayahInSurah}`;
-  const exists = favorites.some((f) => f.id === id);
+    const id = `${data.surahNumber}:${data.ayahInSurah}`;
+    const exists = favorites.some((f) => f.id === id);
 
-  if (exists) {
-    // ❌ UNSAVE
-    const next = favorites.filter((f) => f.id !== id);
-    await persistFavorites(next);
-  } else {
-    // ❤️ SAVE
-    const newFav: FavoriteAyah = {
-      ...data,
-      id,
-      savedAt: Date.now(),
-    };
-    await persistFavorites([newFav, ...favorites]);
+    if (exists) {
+      const next = favorites.filter((f) => f.id !== id);
+      await persistFavorites(next);
+    } else {
+      const newFav: FavoriteAyah = { ...data, id, savedAt: Date.now() };
+      await persistFavorites([newFav, ...favorites]);
+    }
   }
-}
 
-
-  // ✅ effects (all before any return)
   useEffect(() => {
     loadFavorites();
     loadForThisMinute();
@@ -199,186 +212,177 @@ export default function Index() {
     };
   }, []);
 
-  // ✅ only now you can return early
   if (!fontsLoaded) return null;
 
   return (
-    <LinearGradient colors={["#f7f7fb", "#e9ecf3"]} style={{ flex: 1 }}>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: "transparent",
-          justifyContent: "center",
-          padding: 18,
-        }}
-      >
-
-          <ScrollView
-    contentContainerStyle={{
-      padding: 18,
-      paddingBottom: 40,
-    }}
-    showsVerticalScrollIndicator={false}
-  >
-        <View
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: 22,
-            padding: 20,
-            borderWidth: 1,
-            borderColor: "rgba(0,0,0,0.06)",
-            shadowColor: "#000",
-            shadowOpacity: 0.08,
-            shadowRadius: 16,
-            shadowOffset: { width: 0, height: 8 },
-            elevation: 6,
-          }}
+    <LinearGradient colors={theme.bgGradient} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
         >
-          {/* HEADER */}
           <View
             style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
+              backgroundColor: theme.cardBg,
+              borderRadius: 22,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: theme.border,
+
+              // shadows still ok; on dark mode keep subtle
+              shadowColor: theme.shadow,
+              shadowOpacity: isDark ? 0.18 : 0.08,
+              shadowRadius: 16,
+              shadowOffset: { width: 0, height: 8 },
+              elevation: isDark ? 2 : 6,
             }}
           >
-            <Text style={{ fontSize: 13, fontWeight: "700", color: "#111" }}>
-              Qur’an Clock
-            </Text>
+            {/* HEADER */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 13, fontWeight: "700", color: theme.text }}>
+                Qur’an Clock
+              </Text>
 
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              {/* Refresh */}
-              <Pressable
-                onPress={refreshRandom}
-                style={{
-                  backgroundColor: "rgba(0,0,0,0.06)",
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <Ionicons name="refresh" size={18} color="#111" />
-                <Text style={{ fontSize: 12, color: "#111" }}>Refresh</Text>
-              </Pressable>
-
-              {/* Favorite */}
-             <Pressable
-                  onPress={toggleFavorite}
-                  hitSlop={10}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                {/* Refresh */}
+                <Pressable
+                  onPress={refreshRandom}
                   style={{
-                    padding: 6,
+                    backgroundColor: theme.chipBg,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 999,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    borderWidth: 1,
+                    borderColor: theme.border,
                   }}
                 >
+                  <Ionicons name="refresh" size={18} color={theme.text} />
+                  <Text style={{ fontSize: 12, color: theme.text }}>Refresh</Text>
+                </Pressable>
+
+                {/* Favorite */}
+                <Pressable onPress={toggleFavorite} hitSlop={10} style={{ padding: 6 }}>
                   <Ionicons
                     name={isSaved ? "heart" : "heart-outline"}
                     size={22}
-                    color={isSaved ? "#e63946" : "#111"}
+                    color={isSaved ? theme.heart : theme.text}
                   />
                 </Pressable>
 
-
-              {/* Time chip */}
-              <View
-                style={{
-                  backgroundColor: "rgba(0,0,0,0.06)",
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: "#111" }}>
-                  {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </Text>
+                {/* Time chip */}
+                <View
+                  style={{
+                    backgroundColor: theme.chipBg,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, color: theme.text }}>
+                    {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* BODY */}
-          {loading ? (
-            <ActivityIndicator style={{ marginTop: 26 }} />
-          ) : error ? (
-            <Text style={{ marginTop: 20, color: "#b00020" }}>{error}</Text>
-          ) : data ? (
-            <Animated.View style={{ opacity: fade }}>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "800",
-                  marginTop: 16,
-                  color: "#111",
-                }}
-              >
-                {data.surahEnglish}
-              </Text>
-
-              <Text
-                style={{
-                  fontFamily: "Amiri",
-                  fontSize: 13,
-                  color: "#666",
-                  marginTop: 4,
-                }}
-              >
-                {data.surahArabic}
-              </Text>
-
-              <View
-                style={{
-                  marginTop: 14,
-                  height: 3,
-                  width: 44,
-                  borderRadius: 999,
-                  backgroundColor: "rgba(0,0,0,0.12)",
-                }}
-              />
-
-              <Text
-                style={{
-                  fontFamily: "Amiri",
-                  fontSize: 17,
-                  lineHeight: 30,
-                  textAlign: "right",
-                  marginTop: 14,
-                  color: "#111",
-                }}
-              >
-                {data.arabicAyah}
-              </Text>
-
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "#000",
-                  opacity: 0.06,
-                  marginVertical: 14,
-                }}
-              />
-
-              <Text style={{ fontSize: 14, lineHeight: 21, color: "#333" }}>
-                {data.englishAyah}
-              </Text>
-
-              <View
-                style={{
-                  marginTop: 14,
-                  alignSelf: "flex-start",
-                  backgroundColor: "rgba(0,0,0,0.06)",
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 999,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: "#222" }}>
-                  {data.surahNumber}:{data.ayahInSurah} • Global #{data.globalAyah}
+            {/* BODY */}
+            {loading ? (
+              <ActivityIndicator style={{ marginTop: 26 }} />
+            ) : error ? (
+              <Text style={{ marginTop: 20, color: theme.danger }}>{error}</Text>
+            ) : data ? (
+              <Animated.View style={{ opacity: fade }}>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "800",
+                    marginTop: 16,
+                    color: theme.text,
+                  }}
+                >
+                  {data.surahEnglish}
                 </Text>
-              </View>
-            </Animated.View>
-          ) : null}
-        <IslamicCalendarInline />
-        </View>
+
+                <Text
+                  style={{
+                    fontFamily: "Amiri",
+                    fontSize: 13,
+                    color: theme.muted,
+                    marginTop: 4,
+                  }}
+                >
+                  {data.surahArabic}
+                </Text>
+
+                <View
+                  style={{
+                    marginTop: 14,
+                    height: 3,
+                    width: 44,
+                    borderRadius: 999,
+                    backgroundColor: theme.chipBg,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                />
+
+                <Text
+                  style={{
+                    fontFamily: "Amiri",
+                    fontSize: 17,
+                    lineHeight: 30,
+                    textAlign: "right",
+                    marginTop: 14,
+                    color: theme.text,
+                  }}
+                >
+                  {data.arabicAyah}
+                </Text>
+
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: theme.divider,
+                    marginVertical: 14,
+                  }}
+                />
+
+                <Text style={{ fontSize: 14, lineHeight: 21, color: theme.body }}>
+                  {data.englishAyah}
+                </Text>
+
+                <View
+                  style={{
+                    marginTop: 14,
+                    alignSelf: "flex-start",
+                    backgroundColor: theme.chipBg,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, color: theme.text }}>
+                    {data.surahNumber}:{data.ayahInSurah} • Global #{data.globalAyah}
+                  </Text>
+                </View>
+              </Animated.View>
+            ) : null}
+
+            <IslamicCalendarInline />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

@@ -44,13 +44,22 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.circle.fill" color={color} />,
           }}
         />
-        <Tabs.Screen
-          name="islamic-calendar"
+      <Tabs.Screen
+          name="chat"
           options={{
-            title: "Calendar",
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar.badge" color={color} />,
+            title: "Chat",
+            tabBarIcon: ({ color }) => <IconSymbol size={28} name="message" color={color} />,
           }}
         />
+        <Tabs.Screen
+            name="surahs"
+            options={{
+              title: "Surahs",
+              tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+            }}
+          />
+
     </Tabs>
+    
   );
 }
