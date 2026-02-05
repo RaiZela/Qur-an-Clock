@@ -7,13 +7,21 @@ The app combines time, Qur’an verses, prayer reminders, and personal reflectio
 
 ## 🖼️ Screenshots
 
-![Home Screen](./images/home-screen.png)
+![Home Screen](./images/screenshots/home-screen.jpeg)
 
-![Prayer Times](./images/prayer-times.png)
+![Prayer Times](./images/screenshots/prayer-times.jpeg)
 
-![Saved Verses](./images/saved-verses.png)
+![Saved Verses](./images/screenshots/saved-verses.jpeg)
 
-![Surah Reader](./images/surah-reader.png)
+![Surah List](./images/screenshots/surah-list.jpeg)
+
+![Selected Surah English](./images/screenshots/selected-surah-english.jpeg)
+
+![Selected Surah Arabic](./images/screenshots/selected-surah-arabic.jpeg)
+
+![Gratitude Journal](./images/screenshots/gratitude.jpeg)
+
+![Prayer Chat](./images/screenshots/prayer-chat.jpeg) 
 
 ---
 
