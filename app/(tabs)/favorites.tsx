@@ -259,7 +259,6 @@ export default function FavoritesScreen() {
                   onPress={async () => {
                     const text = `${v.surahEnglish} (${ref})\n\n${v.arabicAyah}\n\n${v.englishAyah}`;
                     await AsyncStorage.setItem("last_copied_preview", text);
-                    Alert.alert("Copy", "If you want real copy-to-clipboard, I’ll add it next.");
                   }}
                   style={{
                     backgroundColor: theme.chipBg,
