@@ -65,7 +65,7 @@ This ensures:
 
 🖼️ **Random Verse UI**
 
-![Random Verse](./images/random-verse.png)
+![Random Verse](./images/screenshots/random-verse.jpeg)
 
 ---
 
@@ -80,7 +80,7 @@ This allows users to stay aware of both spiritual and daily timelines.
 
 🖼️ **Calendar View**
 
-![Calendar](./images/calendar.png)
+![Calendar](./images//screenshots/calendar.jpeg)
 
 ---
 
@@ -96,7 +96,7 @@ When selecting a special day, the app displays a short explanation/definition.
 
 🖼️ **Islamic Days Screen**
 
-![Islamic Days](./images/islamic-days.png)
+![Islamic Days](./images/screenshots/islamic-days.jpeg)
 
 ---
 
@@ -114,7 +114,7 @@ A dedicated screen displays daily prayer times with reminder notifications.
 
 🖼️ **Prayer Times UI**
 
-![Prayer Times Detail](./images/prayer-times-detail.png)
+![Prayer Times Detail](./images/screenshots/prayer-times.jpeg)
 
 ---
 
@@ -129,7 +129,7 @@ Users can store favorite ayāt and revisit them later.
 
 🖼️ **Saved Verses**
 
-![Saved Verses List](./images/saved-verses-list.png)
+![Saved Verses List](./images/screeenshots/saved-verses.jpeg)
 
 ---
 
@@ -144,7 +144,7 @@ A personal space to record gratitude entries.
 
 🖼️ **Gratitude Screen**
 
-![Gratitude](./images/gratitude.png)
+![Gratitude](./images/screenshots/gratitude.jpeg)
 
 ---
 
@@ -152,12 +152,12 @@ A personal space to record gratitude entries.
 
 A writing space for users who feel better expressing their thoughts as prayers.
 
-⚠️ This is **not** a messaging system — it is a private reflection space.  
+⚠️ This is **not** a messaging system, it is a private reflection space.  
 (No responses are generated.)
 
 🖼️ **Reflection Chat**
 
-![Prayer Chat](./images/prayer-chat.png)
+![Prayer Chat](./images/screenshots/prayer-chat.jpeg)
 
 ---
 
@@ -171,7 +171,7 @@ A browsing screen where users can select surahs and read them.
 
 🖼️ **Surah List**
 
-![Surah List](./images/surah-list.png)
+![Surah List](./images/surah-list.jpeg)
 
 ---
 
