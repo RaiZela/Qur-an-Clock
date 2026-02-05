@@ -1,50 +1,195 @@
-# Welcome to your Expo app 👋
+# 🕋 Quranic Clock
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A reflective Quran-centered clock designed for daily awareness, learning, and personal spirituality.  
+The app combines time, Qur’an verses, prayer reminders, and personal reflection tools into one minimal experience.
 
-## Get started
+---
 
-1. Install dependencies
+## 🖼️ Screenshots
 
-   ```bash
-   npm install
-   ```
+![Home Screen](./images/home-screen.png)
 
-2. Start the app
+![Prayer Times](./images/prayer-times.png)
 
-   ```bash
-   npx expo start
-   ```
+![Saved Verses](./images/saved-verses.png)
 
-In the output, you'll find options to open the app in a
+![Surah Reader](./images/surah-reader.png)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+# ✨ Features
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 📖 Random Qur’an Verse Engine
 
-```bash
-npm run reset-project
-```
+The application displays a **random Qur’anic verse** that refreshes automatically every minute.  
+Users can also refresh manually and save verses to their favorites.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### ✅ Functionalities
+- Auto refresh every minute
+- Manual refresh button
+- Add/remove verse from favorites
+- Fetches verse dynamically from API
 
-## Learn more
+### 🧠 How the Verse Calculation Works
 
-To learn more about developing your project with Expo, look at the following resources:
+Instead of mapping clock time to a fixed surah:ayah (e.g., 20:114), the app maps time to a **global ayah number (1..6236)** so every verse can appear.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+**Algorithm:**
 
-## Join the community
+minutesToday = hours * 60 + minutes
+dayNumber = YYYYMMDD
+seed = dayNumber * 1440 + minutesToday
+globalAyah = (seed % 6236) + 1
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The verse is fetched from:
+https://api.alquran.cloud/v1/ayah/{globalAyah}
+
+
+This ensures:
+- A different verse every minute
+- Variation across different days
+- Full coverage of the Qur’an (6236 ayāt)
+
+---
+
+🖼️ **Random Verse UI**
+
+![Random Verse](./images/random-verse.png)
+
+---
+
+## 🌙 Dual Calendar Display
+
+The clock shows both:
+
+- 🌞 Solar (Gregorian) date
+- 🌙 Lunar (Hijri) date
+
+This allows users to stay aware of both spiritual and daily timelines.
+
+🖼️ **Calendar View**
+
+![Calendar](./images/calendar.png)
+
+---
+
+## 🕌 Islamic Days Calculator
+
+The app calculates and highlights:
+
+- Ramadan days
+- Dhul Hijjah
+- Day of Arafah
+
+When selecting a special day, the app displays a short explanation/definition.
+
+🖼️ **Islamic Days Screen**
+
+![Islamic Days](./images/islamic-days.png)
+
+---
+
+## ⏰ Prayer Times Screen
+
+A dedicated screen displays daily prayer times with reminder notifications.
+
+### Current Status
+- Prayer times displayed
+- Notification system implemented
+
+### 🚧 TODO
+- Trigger notifications at exact scheduled time  
+- Avoid firing notifications on screen load or toggle
+
+🖼️ **Prayer Times UI**
+
+![Prayer Times Detail](./images/prayer-times-detail.png)
+
+---
+
+## ⭐ Saved Verses Library
+
+Users can store favorite ayāt and revisit them later.
+
+### Features
+- Saved verses list
+- Search functionality
+- Quick access for reflection
+
+🖼️ **Saved Verses**
+
+![Saved Verses List](./images/saved-verses-list.png)
+
+---
+
+## 🤲 Gratitude List
+
+A personal space to record gratitude entries.
+
+### Features
+- Add new gratitude notes
+- Maintain a growing reflection list
+- Minimal journaling experience
+
+🖼️ **Gratitude Screen**
+
+![Gratitude](./images/gratitude.png)
+
+---
+
+## 📝 Prayer Writing (Reflection Chat)
+
+A writing space for users who feel better expressing their thoughts as prayers.
+
+⚠️ This is **not** a messaging system — it is a private reflection space.  
+(No responses are generated.)
+
+🖼️ **Reflection Chat**
+
+![Prayer Chat](./images/prayer-chat.png)
+
+---
+
+## 📚 Surah Reader
+
+A browsing screen where users can select surahs and read them.
+
+### Reading Options
+- Arabic
+- English translation
+
+🖼️ **Surah List**
+
+![Surah List](./images/surah-list.png)
+
+---
+
+# 🧱 Architecture Overview
+
+- Verse API: **alquran.cloud**
+- Time-based verse generation algorithm
+- Local storage for:
+  - Favorites
+  - Gratitude entries
+  - Prayer writing notes
+
+---
+
+# 🚧 Roadmap
+
+- [ ] Fix prayer notification scheduling
+- [ ] Improve offline caching
+- [ ] Add advanced filtering for saved verses
+- [ ] UI refinements
+
+---
+
+# 🤍 Philosophy
+
+This project is built as a **quiet spiritual companion**,
+not a replacement for faith or worship, but a supportive digital space for reflection, learning, and awareness.
+
+
