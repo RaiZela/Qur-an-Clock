@@ -7,7 +7,7 @@ The app combines time, Qur’an verses, prayer reminders, and personal reflectio
 
 ## 🖼️ Screenshots
 
-![Home Screen](assets\images\screenshots\home-screen.jpeg)
+![Home Screen](assets/images/screenshots/home-screen.jpeg)
 
 ![Prayer Times](./images/screenshots/prayer-times.jpeg)
 
