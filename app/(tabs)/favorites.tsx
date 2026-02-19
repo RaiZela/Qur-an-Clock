@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Clipboard from "expo-clipboard";
 import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -29,7 +31,11 @@ type FavoriteAyah = {
 
 function formatSavedDate(ts: number) {
   const d = new Date(ts);
-  return d.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString([], {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export default function FavoritesScreen() {
@@ -38,7 +44,9 @@ export default function FavoritesScreen() {
 
   const theme = useMemo(() => {
     return {
-      bgGradient: isDark ? (["#0b0b0f", "#12121a"] as const) : (["#f7f7fb", "#e9ecf3"] as const),
+      bgGradient: isDark
+        ? (["#0b0b0f", "#12121a"] as const)
+        : (["#f7f7fb", "#e9ecf3"] as const),
 
       cardBg: isDark ? "#12121a" : "#ffffff",
       border: isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.06)",
@@ -63,10 +71,15 @@ export default function FavoritesScreen() {
 
   const [items, setItems] = useState<FavoriteAyah[]>([]);
   const [query, setQuery] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   async function loadFavorites() {
-    const raw = await AsyncStorage.getItem(FAV_KEY);
-    setItems(raw ? JSON.parse(raw) : []);
+    try {
+      const raw = await AsyncStorage.getItem(FAV_KEY);
+      setItems(raw ? JSON.parse(raw) : []);
+    } catch {
+      setItems([]);
+    }
   }
 
   async function persist(next: FavoriteAyah[]) {
@@ -90,6 +103,19 @@ export default function FavoritesScreen() {
         },
       },
     ]);
+  }
+
+  async function copyToClipboard(id: string, text: string) {
+    await Clipboard.setStringAsync(text);
+
+    // Optional haptic feedback
+    try {
+      await Haptics.selectionAsync();
+    } catch {}
+
+    // Small inline feedback instead of alert spam
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1200);
   }
 
   useEffect(() => {
@@ -116,7 +142,13 @@ export default function FavoritesScreen() {
     <LinearGradient colors={theme.bgGradient} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }}>
         {/* Header */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <View>
             <Text style={{ fontSize: 22, fontWeight: "900", color: theme.text }}>
               Favorites
@@ -138,7 +170,9 @@ export default function FavoritesScreen() {
                 borderColor: theme.border,
               }}
             >
-              <Text style={{ fontSize: 12, color: theme.text, fontWeight: "700" }}>Clear</Text>
+              <Text style={{ fontSize: 12, color: theme.text, fontWeight: "700" }}>
+                Clear
+              </Text>
             </Pressable>
           ) : null}
         </View>
@@ -215,7 +249,13 @@ export default function FavoritesScreen() {
               }}
             >
               {/* Top row */}
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <View style={{ flex: 1, paddingRight: 12 }}>
                   <Text style={{ fontSize: 15, fontWeight: "900", color: theme.text }}>
                     {v.surahEnglish} • {ref}
@@ -254,11 +294,11 @@ export default function FavoritesScreen() {
               </Text>
 
               {/* Actions */}
-              <View style={{ marginTop: 14, flexDirection: "row", gap: 10 }}>
+              <View style={{ marginTop: 14, flexDirection: "row", gap: 10, alignItems: "center" }}>
                 <Pressable
-                  onPress={async () => {
+                  onPress={() => {
                     const text = `${v.surahEnglish} (${ref})\n\n${v.arabicAyah}\n\n${v.englishAyah}`;
-                    await AsyncStorage.setItem("last_copied_preview", text);
+                    copyToClipboard(v.id, text);
                   }}
                   style={{
                     backgroundColor: theme.chipBg,
@@ -290,6 +330,10 @@ export default function FavoritesScreen() {
                     {v.surahArabic}
                   </Text>
                 </View>
+
+                {copiedId === v.id ? (
+                  <Text style={{ fontSize: 12, color: theme.muted }}>Copied ✅</Text>
+                ) : null}
               </View>
             </View>
           );
