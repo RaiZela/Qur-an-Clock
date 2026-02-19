@@ -7,21 +7,21 @@ The app combines time, Qur’an verses, prayer reminders, and personal reflectio
 
 ## 🖼️ Screenshots
 
-![Home Screen](./images/screenshots/home-screen.jpeg)
+![Home Screen](assets/images/screenshots/home-screen.jpeg)
 
-![Prayer Times](./images/screenshots/prayer-times.jpeg)
+![Prayer Times](assets/images/screenshots/prayer-times.jpeg)
 
-![Saved Verses](./images/screenshots/saved-verses.jpeg)
+![Saved Verses](assets/images/screenshots/saved-verses.jpeg)
 
-![Surah List](./images/screenshots/surah-list.jpeg)
+![Surah List](assets/images/screenshots/surah-list.jpeg)
 
-![Selected Surah English](./images/screenshots/selected-surah-english.jpeg)
+![Selected Surah English](assets/images/screenshots/selected-surah-english.jpeg)
 
-![Selected Surah Arabic](./images/screenshots/selected-surah-arabic.jpeg)
+![Selected Surah Arabic](assets/images/screenshots/selected-surah-arabic.jpeg)
 
-![Gratitude Journal](./images/screenshots/gratitude.jpeg)
+![Gratitude Journal](assets/images/screenshots/gratitude.jpeg)
 
-![Prayer Chat](./images/screenshots/prayer-chat.jpeg) 
+![Prayer Chat](assets/images/screenshots/prayer-chat.jpeg) 
 
 ---
 
@@ -65,7 +65,7 @@ This ensures:
 
 🖼️ **Random Verse UI**
 
-![Random Verse](./images/screenshots/random-verse.jpeg)
+![Random Verse](assets/images/screenshots/random-verse.jpeg)
 
 ---
 
@@ -80,7 +80,7 @@ This allows users to stay aware of both spiritual and daily timelines.
 
 🖼️ **Calendar View**
 
-![Calendar](./images//screenshots/calendar.jpeg)
+![Calendar](assets/images/screenshots/calendar.jpeg)
 
 ---
 
@@ -96,7 +96,7 @@ When selecting a special day, the app displays a short explanation/definition.
 
 🖼️ **Islamic Days Screen**
 
-![Islamic Days](./images/screenshots/islamic-days.jpeg)
+![Islamic Days](assets/images/screenshots/islamic-days.jpeg)
 
 ---
 
@@ -114,7 +114,7 @@ A dedicated screen displays daily prayer times with reminder notifications.
 
 🖼️ **Prayer Times UI**
 
-![Prayer Times Detail](./images/screenshots/prayer-times.jpeg)
+![Prayer Times Detail](assets/images/screenshots/prayer-times.jpeg)
 
 ---
 
@@ -129,7 +129,7 @@ Users can store favorite ayāt and revisit them later.
 
 🖼️ **Saved Verses**
 
-![Saved Verses List](./images/screeenshots/saved-verses.jpeg)
+![Saved Verses List](assets/images/screenshots/saved-verses.jpeg)
 
 ---
 
@@ -144,7 +144,7 @@ A personal space to record gratitude entries.
 
 🖼️ **Gratitude Screen**
 
-![Gratitude](./images/screenshots/gratitude.jpeg)
+![Gratitude](assets/images/screenshots/gratitude.jpeg)
 
 ---
 
@@ -157,7 +157,7 @@ A writing space for users who feel better expressing their thoughts as prayers.
 
 🖼️ **Reflection Chat**
 
-![Prayer Chat](./images/screenshots/prayer-chat.jpeg)
+![Prayer Chat](assets/images/screenshots/prayer-chat.jpeg)
 
 ---
 
@@ -171,7 +171,7 @@ A browsing screen where users can select surahs and read them.
 
 🖼️ **Surah List**
 
-![Surah List](./images/surah-list.jpeg)
+![Surah List](assets/images/screenshots/surah-list.jpeg)
 
 ---
 
